@@ -1,9 +1,29 @@
 
+import { db } from '../db';
+import { videoProjectsTable } from '../db/schema';
 import { type DeleteVideoProjectInput } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export async function deleteVideoProject(input: DeleteVideoProjectInput): Promise<{ success: boolean }> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is deleting a video project from the database by ID.
-    // Should return success status and throw an error if the project doesn't exist.
-    return Promise.resolve({ success: true });
+  try {
+    // Check if the project exists first
+    const existingProject = await db.select()
+      .from(videoProjectsTable)
+      .where(eq(videoProjectsTable.id, input.id))
+      .execute();
+
+    if (existingProject.length === 0) {
+      throw new Error(`Video project with id ${input.id} not found`);
+    }
+
+    // Delete the project
+    const result = await db.delete(videoProjectsTable)
+      .where(eq(videoProjectsTable.id, input.id))
+      .execute();
+
+    return { success: true };
+  } catch (error) {
+    console.error('Video project deletion failed:', error);
+    throw error;
+  }
 }

@@ -1,9 +1,24 @@
 
+import { db } from '../db';
+import { videoProjectsTable } from '../db/schema';
 import { type GetVideoProjectInput, type VideoProject } from '../schema';
+import { eq } from 'drizzle-orm';
 
-export async function getVideoProject(input: GetVideoProjectInput): Promise<VideoProject | null> {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching a single video project by ID from the database.
-    // Returns null if project is not found.
-    return Promise.resolve(null);
-}
+export const getVideoProject = async (input: GetVideoProjectInput): Promise<VideoProject | null> => {
+  try {
+    const results = await db.select()
+      .from(videoProjectsTable)
+      .where(eq(videoProjectsTable.id, input.id))
+      .limit(1)
+      .execute();
+
+    if (results.length === 0) {
+      return null;
+    }
+
+    return results[0];
+  } catch (error) {
+    console.error('Get video project failed:', error);
+    throw error;
+  }
+};
